@@ -1,0 +1,11 @@
+absl_py
+flask
+keras
+matplotlib
+numpy
+pandas
+pyspark
+requests
+scikit_learn
+tensorflow-cpu
+gunicorn
