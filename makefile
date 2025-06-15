@@ -18,7 +18,7 @@ train-mlflow:
 	python src/experiments/train_mlflow.py --epochs 20 --batch-size 32
 
 run-api:
-	gunicorn -w 4 -b 127.0.0.1:9696 src.api.predict:app
+	gunicorn -w 4 -b 0.0.0.0:9696 src.api.predict:app
 
 mlflow-ui:
 	mlflow ui
