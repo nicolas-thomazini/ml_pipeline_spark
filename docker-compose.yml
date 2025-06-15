@@ -1,0 +1,25 @@
+services:
+  api:
+    build: .
+    container_name: solana_api
+    ports:
+      - "9696:9696"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+    depends_on:
+      - mlflow
+    command: make run-api
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: solana_mlflow
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://0.0.0.0:5000
+    command: mlflow ui --host 0.0.0.0 --port 5000
+    volumes:
+      - ./mlruns:/mlflow/mlruns
