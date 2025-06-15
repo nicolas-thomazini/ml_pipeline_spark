@@ -17,3 +17,12 @@ __pycache__/
 venv
 .venv
 /venv
+.dvc/config.local
+.dvc/config
+.dvc
+
+# Make runs
+/mlruns
+
+# JSON file that contains dvc configure account and key
+credentials.json
