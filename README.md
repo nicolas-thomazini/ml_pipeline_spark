@@ -1,17 +1,26 @@
 # ml_solana_predict
 
-**`ml_solana_predict`** is a machine learning pipeline for time series forecasting of the closing price of the Solana (SOL) cryptocurrency using LSTM (Long Short-Term Memory) models. It includes training, inference (via API), experiment tracking with MLflow, and utility scripts for deployment and reproducibility.
+ml_solana_predict is a machine learning pipeline for forecasting the closing price of the Solana (SOL) cryptocurrency using LSTM (Long Short-Term Memory) models. It includes:
 
----
+Training scripts (traditional and with MLflow)
+
+An API for model inference
+
+MLflow for experiment tracking
+
+Utility scripts for reproducibility and automation
 
 ## 1. 🎯 Project Purpose
 
-The goal of this project is to:
+This project was built to:
 
-- Forecast future closing prices for the Solana cryptocurrency using historical data in notebook and other metrics.
-- Provide an API endpoint to serve predictions via a Flask + Gunicorn application.
-- Support model experimentation and tracking with MLflow.
-- Ensure modularity, scalability, and CI/CD readiness via a clean project structure.
+- Forecasting SOL’s next-day closing price using LSTM
+
+- Model deployment via an API endpoint
+
+- Experiment tracking and reproducibility with MLflow
+
+- Execution either locally (Makefile) or via Docker
 
 ---
 
@@ -25,13 +34,15 @@ ml_solana_predict/
 │   └── solana.csv.dvc          # When you pull solana.csv
 ├── examples/                   # Sample JSON input for prediction
 │   └── example_request.json    # Dataset folder (e.g., solana.csv)
+├── models/
+│   └── model_lstm_solana.bin   # Serialized models (e.g., model_lstm_solana.bin)
 ├── src/
 │   ├── api/                    # API (Flask app with prediction endpoint)
 │   │   └── predict.py
 │   ├── configs/                # Configurations (e.g., Spark or env setup)
 │   ├── experiments/            # MLflow-based experiments
 │   │   └── train_mlflow.py
-│   ├── models/                 # Serialized models (e.g., model_lstm_solana.bin)
+│           ├── models/                
 │   ├── pipelines/              # Utility pipeline scripts
 │   │   └── pipeline_final.py
 │   ├── tests/                  # Unit and integration tests
@@ -59,17 +70,19 @@ ml_solana_predict/
 
 **Python 3.12**
 
-- Flask + Gunicorn – serving the prediction API
+- Keras + TensorFlow (LSTM model)
 
-- Keras + TensorFlow – LSTM model training
+- Flask + Gunicorn (API)
 
-- MLflow – experiment tracking and model logging
+- MLflow (tracking + serving)
 
-- Scikit-learn – preprocessing (MinMaxScaler)
+- Scikit-learn (scaling)
 
-- Makefile – task automation (make train, make lint, etc.)
+- DVC (optional, for data versioning)
 
-- curl / HTTP – testing the API locally
+- Docker + Docker Compose
+
+- Makefile (local task automation)
 
 ---
 
@@ -138,7 +151,13 @@ source venv/bin/activate   # Activate it (Linux/macOS)
 pip install -r requirements.txt
 ```
 
-### 🧠 4.2 Train the model
+---
+
+### 4.2
+
+You can choose between:
+
+### 🧠 4.2.1 Train the model
 
 `⚠️ ATTENTION`: Make sure you're at the root of the project directory before running these commands.
 
@@ -164,7 +183,7 @@ You can start the MLflow UI with the provided make command, and if needed, custo
 
 ---
 
-## 🔮 4.3 Run the API
+## 🔮 4.2.2 Run the API
 
 To start the API locally with Gunicorn:
 
@@ -174,7 +193,7 @@ make run-api
 
 ---
 
-### 🔍 4.4 Run tests & lint
+### 🔍 4.2.3 Run tests & lint
 
 You can test the project.
 
@@ -188,25 +207,33 @@ make format    # Auto-format code with black + isort
 
 ---
 
-## 5. 🐳 #TODO: Run with Docker
+## 4.3 🐳 Dockerized (MLflow + Serving Ready)
 
-A docker-compose.yml file is being prepared to launch both:
+Run everything — MLflow UI + Serving API — via Docker Compose:
 
-- the prediction API (Flask + Gunicorn)
-
-- the MLflow tracking server
-
-You will soon be able to run everything with:
-
-```
+```bash
 docker-compose up --build
 ```
 
+This will:
+
+- 🧪 Start the MLflow Tracking UI at http://localhost:5000
+
+- 🤖 Start the MLflow Model Serving API at http://localhost:5001/invocations
+
+- 🗂️ Mount volumes so models and logs persist in ./mlruns/
+
+Ensure your model is registered in MLflow as solana_lstm_model (done automatically via train_mlflow.py).
+
+## 6. 🔧 Dev Tools
+
+```bash
+make lint      # Check style (flake8)
+make format    # Auto-format code
+make clean     # Remove temporary files
+```
+
 ✅ This will ensure full reproducibility and easier deployment.
-
-## License
-
-This project is licensed under the [MIT License](License-MIT). See LICENSE for details.
 
 ## 7. 🧠 Contributing & Ideas
 
@@ -221,3 +248,8 @@ This project is a learning-friendly and scalable ML pipeline. If you want to:
 - Expand to multi-asset forecasting
 
 - Feel free to fork and open a PR or suggestion.
+
+## License
+
+This project is licensed under the [MIT License](License-MIT). See LICENSE for details.
+
