@@ -1,6 +1,6 @@
 import argparse
+import os
 import pickle
-
 import mlflow
 import mlflow.keras
 import numpy as np
@@ -10,14 +10,12 @@ from keras.models import Sequential
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras import backend as K
 
-
 def create_dataset(data, time_step=30):
     x, y = [], []
     for i in range(len(data) - time_step):
         x.append(data[i : i + time_step, 0])
         y.append(data[i + time_step, 0])
     return np.array(x), np.array(y)
-
 
 def build_model(input_shape):
     K.clear_session()
@@ -28,15 +26,16 @@ def build_model(input_shape):
     model.compile(optimizer="adam", loss="mean_squared_error")
     return model
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--epochs", type=int, default=20)
 parser.add_argument("--batch-size", type=int, default=32)
 parser.add_argument("--time-step", type=int, default=30)
-parser.add_argument("--output", type=str, default="./src/models/model_lstm_solana.bin")
+parser.add_argument("--output", type=str, default="models/model_lstm_solana.bin")  # <- novo caminho
 args = parser.parse_args()
 
-DATA_PATH = "./data/solana.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(BASE_DIR, "../../data/solana.csv")
+
 TIME_STEP = args.time_step
 INPUT_SHAPE = (TIME_STEP, 1)
 
@@ -71,8 +70,19 @@ with mlflow.start_run():
     mlflow.log_metric("mape_vs_real", mape)
     print(f"❗ Erro percentual: {mape:.2f}%")
 
+    os.makedirs(os.path.dirname(args.output), exist_ok=True)
+
     with open(args.output, "wb") as f_out:
         pickle.dump((scaler, model), f_out)
-
-    mlflow.log_artifact(args.output)
     print(f"✅ Modelo salvo em: {args.output}")
+    mlflow.log_artifact(args.output)
+
+    from mlflow.models.signature import infer_signature
+    signature = infer_signature(x, model.predict(x))
+
+    mlflow.keras.log_model(
+        model,
+        name="model",
+        registered_model_name="solana_lstm_model",
+        signature=signature
+    )
