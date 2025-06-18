@@ -80,9 +80,29 @@ with mlflow.start_run():
     from mlflow.models.signature import infer_signature
     signature = infer_signature(x, model.predict(x))
 
+    from mlflow.utils.environment import _mlflow_conda_env
+
+    conda_env = _mlflow_conda_env(
+        additional_pip_deps=[
+            "mlflow==3.1.0",
+            "tensorflow-cpu==2.19.0",
+            "keras==3.10.0",
+            "numpy==2.1.3",
+            "pandas",
+            "scikit-learn"
+        ]
+    )
+
     mlflow.keras.log_model(
         model,
-        name="model",
+        artifact_path="model",
         registered_model_name="solana_lstm_model",
-        signature=signature
+        signature=signature,
+        conda_env=conda_env
     )
+
+
+    print("🧠 Modelo registrado no MLflow: solana_lstm_model")
+    print("🌐 Para servir o modelo, execute:")
+    print('   mlflow models serve -m "models:/solana_lstm_model/1" -p 1234 --no-conda')
+    print("🚪 Acesse via: http://localhost:1234/invocations")
