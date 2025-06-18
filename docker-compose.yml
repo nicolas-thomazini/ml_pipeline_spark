@@ -6,24 +6,45 @@ services:
       - "5000:5000"
     volumes:
       - ./mlruns:/mlflow/mlruns
-    environment:
-      - MLFLOW_TRACKING_URI=http://0.0.0.0:5000
     command: mlflow ui --host 0.0.0.0 --port 5000
 
+  init-train:
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    container_name: solana_init_train
+    depends_on:
+      - mlflow
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+      - ./data:/app/data
+
   mlflow-serving:
-    image: ghcr.io/mlflow/mlflow:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow-serving
     container_name: solana_mlflow_serving
     ports:
       - "5001:5000"
+    depends_on:
+      - init-train
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
-    command: >
-      mlflow models serve
-      -m "models:/solana_lstm_model/1"
-      --no-conda
-      --host 0.0.0.0
-      --port 5000
-    depends_on:
-      - mlflow
     volumes:
       - ./mlruns:/mlflow/mlruns
+
+  solana-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: solana_api
+    ports:
+      - "9696:9696"
+    depends_on:
+      - mlflow-serving
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - .:/app
