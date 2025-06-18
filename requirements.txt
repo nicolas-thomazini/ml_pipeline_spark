@@ -1,6 +1,6 @@
 absl_py
 flask
-keras
+keras==3.10.0
 matplotlib
 numpy
 pandas
@@ -9,3 +9,6 @@ requests
 scikit_learn
 tensorflow-cpu
 gunicorn
+mlflow==3.1.0
+dvc[gdrive]
+ 
